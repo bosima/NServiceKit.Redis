@@ -102,6 +102,13 @@ namespace NServiceKit.Redis
 			return success;
 		}
 
+		public long AddRangeToSortedSetWithScores(string setId, List<KeyValuePair<string, double>> valuesWithScore)
+		{
+			var uSetId = setId.ToUtf8Bytes();
+			var byteValuesWithScore = valuesWithScore.Select(x => new KeyValuePair<byte[], double>(x.Key.ToUtf8Bytes(), x.Value)).ToList();
+			return ZAdd(setId, byteValuesWithScore);
+		}
+
 		public bool AddRangeToSortedSet(string setId, List<string> values, long score)
 		{
 			var pipeline = CreatePipelineCommand();
@@ -413,9 +420,19 @@ namespace NServiceKit.Redis
 			return base.ZInterStore(intoSetId, setIds);
 		}
 
-		public long StoreUnionFromSortedSets(string intoSetId, params string[] setIds)
+        public long StoreIntersectFromSortedSetsWithWeights(string intoSetId, params KeyValuePair<string, double>[] setIdWithWeightPairs)
+        {
+            return base.ZInterStoreWithWeights(intoSetId, setIdWithWeightPairs);
+        }
+
+        public long StoreUnionFromSortedSets(string intoSetId, params string[] setIds)
 		{
 			return base.ZUnionStore(intoSetId, setIds);
 		}
-	}
+
+        public long StoreUnionFromSortedSetsWithWeights(string intoSetId, params KeyValuePair<string, double>[] setIdWithWeightPairs)
+        {
+            return base.ZUnionStoreWithWeights(intoSetId, setIdWithWeightPairs);
+        }
+    }
 }
